@@ -15,6 +15,8 @@ logger = Logger("alert.log")
 
 class WeChatClient:
     weixin_dict = ReadConfig("weixin", 'jcy/conf/alert.conf').get_config()
+    openid_dict = ReadConfig("jcy", 'jcy/conf/openid.conf').get_config()
+
     _host = weixin_dict['host']
     _appid = weixin_dict['appid']
     _secret = weixin_dict['secret']
@@ -47,13 +49,11 @@ class WeChatClient:
             logger.error('获取access token失败')
 
     # 定义请求函数
-    def send_msg(self, open_id, name):
+    def send_msg(self, phone, name, time):
         url = self._send_url + self._access_token
-        # 获取当前日期和时间
-        current_time = datetime.datetime.now()
         # 格式化日期和时间为字符串
-        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-
+        formatted_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        open_id = self.openid_dict[phone]
         data = {
             "touser": open_id,
             "template_id": self._template_id,
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     # 获取当前日期和时间
     current_time = datetime.datetime.now()
     # 格式化日期和时间为字符串
-    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    str_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     # 打印格式化后的日期和时间
-    print("当前日期和时间:", formatted_time)
+    print("当前日期和时间:", str_time)
 

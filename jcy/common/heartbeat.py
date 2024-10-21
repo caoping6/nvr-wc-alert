@@ -10,7 +10,9 @@ from read_config import ReadConfig
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 from logger_util import Logger
+
 logger = Logger("alert.log")
+
 
 class Heartbeat:
     login_dict = ReadConfig("login", 'jcy/conf/alert.conf').get_config()
@@ -30,19 +32,19 @@ class Heartbeat:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super(Heartbeat, cls).__new__(cls)
-                    cls._instance.login(cls._login_url, cls._username, cls._password)
+                    cls._instance.login()
         return cls._instance
 
-    def login(self, url, username, password, algorithm='SHA-256'):
+    def login(self, algorithm='SHA-256'):
 
-        response = requests.post(url, auth=HTTPDigestAuth(username, password), verify=False)
+        response = requests.post(self._login_url, auth=HTTPDigestAuth(self._username, self._password), verify=False)
 
         # 检查是否需要重新认证
         if response.status_code == 401:
             # 如果提供的算法不是服务器支持的算法，则可能需要调整算法
             response.request.headers['Authorization'] = 'Digest ' + algorithm
             # 重新发送请求
-            response = requests.get(url, auth=HTTPDigestAuth(username, password), verify=False)
+            response = requests.get(self._login_url, auth=HTTPDigestAuth(self._username, self._password), verify=False)
 
         # 检查登录是否成功
         if response.ok:
@@ -57,7 +59,6 @@ class Heartbeat:
         else:
             print('登录失败')
 
-
     # 定义请求函数
     def send_heartbeat(self):
         logger.info("start heartbeat")
@@ -71,16 +72,27 @@ class Heartbeat:
         try:
             response = requests.post(self._heart_url, headers=headers, verify=False, json={})
             result = json.loads(response.text)
-            logger.info(f"Status Code: {response.status_code}\nResponse Text: {response.text}")
+            logger.info(f"Heartbeat Status Code: {response.status_code}\nResponse Text: {response.text}")
             if 'error_code' in result:
-                self.login(self._login_url, self._username, self._password)
+                self.login()
         except requests.exceptions.RequestException as e:
             logger.error(f"Request failed: {e}")
+            self.login()
+
+    def check(self, data):
+        logger.info("start check")
+        headers = {
+            'Content-Type': 'application/json',
+            'X-csrftoken': self._token,
+            'Cookie': self._cookie
+        }
+        try:
+            response = requests.post(self._check_url, headers=headers, verify=False, json=data)
+            logger.info(f"Check Status Code: {response.status_code}\nResponse Text: {response.text}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Check Request failed: {e}")
             self.login(self._login_url, self._username, self._password)
 
-
-    def check(self):
-        url = self._host + ""
 
 if __name__ == '__main__':
 
