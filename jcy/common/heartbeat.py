@@ -6,12 +6,10 @@ import threading
 from urllib3.exceptions import InsecureRequestWarning
 from requests.auth import HTTPDigestAuth
 from read_config import ReadConfig
-
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
 from logger_util import Logger
 
-logger = Logger("alert.log")
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+logger = Logger()
 
 
 class Heartbeat:
@@ -32,7 +30,7 @@ class Heartbeat:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super(Heartbeat, cls).__new__(cls)
-                    cls._instance.login()
+                    # cls._instance.login()
         return cls._instance
 
     def login(self, algorithm='SHA-256'):
@@ -91,7 +89,7 @@ class Heartbeat:
             logger.info(f"Check Status Code: {response.status_code}\nResponse Text: {response.text}")
         except requests.exceptions.RequestException as e:
             logger.error(f"Check Request failed: {e}")
-            self.login(self._login_url, self._username, self._password)
+            self.login()
 
 
 if __name__ == '__main__':

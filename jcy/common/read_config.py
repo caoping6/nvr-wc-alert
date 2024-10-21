@@ -1,13 +1,13 @@
 import configparser
 import os
-from logger_util import Logger
-logger = Logger("alert.log")
+from jcy.common.logger_util import Logger
+logger = Logger()
 
 BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 logger.info("config parser BASEDIR=" + BASEDIR)
 
-class ReadConfig(object):
 
+class ReadConfig(object):
     _config = None
 
     def __init__(self, section, config):

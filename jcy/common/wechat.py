@@ -2,15 +2,12 @@ import json
 
 import requests
 import threading
-from urllib3.exceptions import InsecureRequestWarning
 import datetime
 from read_config import ReadConfig
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
 from logger_util import Logger
 
-logger = Logger("alert.log")
+logger = Logger()
 
 
 class WeChatClient:
