@@ -1,8 +1,8 @@
 import time
 
-import requests
 from heartbeat import Heartbeat
 from datetime import datetime, time
+import time
 from wechat import WeChatClient
 from logger_util import Logger
 import threading
@@ -31,8 +31,8 @@ def read_from_json_file():
 def loop_heartbeat():
     while True:
         logger.info("send to Heartbeat...")
-        hb.send_heartbeat()
-        if is_clock_time("00:05-00:10", datetime.now()):
+        # hb.send_heartbeat()
+        if is_clock_time("00:05-00:10", datetime.now().time()):
             write_to_json_file({})
         time.sleep(5)
 
@@ -48,6 +48,8 @@ def loop_check(request_json):
             request_json['sequence'] = data["sequence"]
             request_json['lap_number'] = data["lap_number"]
             parse_face_alarm(data)
+        else:
+            break
         time.sleep(5)
 
 
@@ -132,16 +134,18 @@ def check_first():
             "sequence": sequence,
             "lap_number": lap_number
         }
-        thread_check = threading.Thread(target=loop_check, args=request_json)
-        thread_check.start()
-
+        loop_check(request_json)
     else:
         hb.login()
+    time.sleep(5)
 
 
 if __name__ == '__main__':
     logger.info("start process...")
-    thread = threading.Thread(target=loop_heartbeat(), args=())
+    thread = threading.Thread(target=loop_heartbeat)
     thread.start()
-    check_first()
+    time.sleep(10)
+    logger.info("start check...")
+    while True:
+        check_first()
 
