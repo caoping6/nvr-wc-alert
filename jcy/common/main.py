@@ -54,6 +54,8 @@ def loop_check(request_json):
 
 
 def parse_face_alarm(data):
+    if "alarm_list" not in data:
+        return
     alarm_list = data["alarm_list"]
     for alarm in alarm_list:
         if "face_alarm" in alarm.keys():
@@ -129,10 +131,12 @@ def check_first():
         lap_number = data["lap_number"]
 
         request_json = {
-            "subscribe_ai_metadata": True,
-            "reader_id": reader_id,
-            "sequence": sequence,
-            "lap_number": lap_number
+            "data": {
+                "subscribe_ai_metadata": True,
+                "reader_id": reader_id,
+                "sequence": sequence,
+                "lap_number": lap_number
+            }
         }
         loop_check(request_json)
     else:
