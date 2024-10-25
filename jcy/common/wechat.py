@@ -75,10 +75,7 @@ class WeChatClient:
 
 
 if __name__ == '__main__':
-    # 获取当前日期和时间
-    current_time = datetime.datetime.now()
-    # 格式化日期和时间为字符串
-    str_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-    # 打印格式化后的日期和时间
-    print("当前日期和时间:", str_time)
+    web_client = WeChatClient()
+    web_client.get_token()
+    print(web_client._access_token)
 
