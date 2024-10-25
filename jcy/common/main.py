@@ -30,11 +30,15 @@ def read_from_json_file():
 
 def loop_heartbeat():
     while True:
-        logger.info("send to Heartbeat...")
-        # hb.send_heartbeat()
-        if is_clock_time("00:05-00:10", datetime.now().time()):
-            write_to_json_file({})
-        time.sleep(5)
+        try:
+            logger.info("send to Heartbeat...")
+            # hb.send_heartbeat()
+            if is_clock_time("00:05-00:10", datetime.now().time()):
+                write_to_json_file({})
+            time.sleep(5)
+        except Exception as e:
+            logger.error(f"loop heartbeat failed: {e}")
+            time.sleep(2)
 
 
 def loop_check(request_json):
@@ -151,5 +155,10 @@ if __name__ == '__main__':
     time.sleep(10)
     logger.info("start check...")
     while True:
-        check_first()
+        try:
+            check_first()
+        except Exception as e:
+            logger.error(f"check first failed: {e}")
+            time.sleep(2)
+
 
