@@ -87,6 +87,7 @@ class Heartbeat:
         try:
             response = requests.post(self._check_url, headers=headers, verify=False, json=data)
             logger.info(f"Check Status Code: {response.status_code}\nResponse Text: {response.text}")
+            return response
         except requests.exceptions.RequestException as e:
             logger.error(f"Check Request failed: {e}")
             self.login()

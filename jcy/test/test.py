@@ -12,6 +12,19 @@ def loop_heartbeat():
         time.sleep(5)
 
 
+def check(data):
+    if "alarm_lists" not in data:
+        return
+    alarm_list = data["alarm_list"]
+    for alarm in alarm_list:
+        if "face_alarm" in alarm.keys():
+            face_alarms = alarm["face_alarm"]
+            alarm_time = alarm["time"]
+            for face_alarm in face_alarms:
+                face_id = face_alarm["Id"]
+                if face_id > 0:
+                    print("name= " + face_alarm["Name"])
+
 if __name__ == '__main__':
     # 获取当前日期和时间
     logger.info("程序开始...")
@@ -24,14 +37,8 @@ if __name__ == '__main__':
     result = json.loads(response)
     if result is not None and result.get("result") == 'success':
         data = result.get("data")
-        alarm_list = data["alarm_list"]
-        for alarm in alarm_list:
-            if "face_alarm" in alarm.keys():
-                face_alarms = alarm["face_alarm"]
-                alarm_time = alarm["time"]
-                for face_alarm in face_alarms:
-                    face_id = face_alarm["Id"]
-                    if face_id > 0:
-                        print("name= " + face_alarm["Name"])
+        check(data)
+        print("success")
+
 
 
