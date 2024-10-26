@@ -70,20 +70,21 @@ def parse_face_alarm(data):
                 if face_id > 0:
                     face_name = face_alarm["Name"]
                     face_phone = face_alarm["Phone"]
-                    face_time = datetime.strptime(alarm_time, "%m/%d/%Y %H:%M:%S")
-                    check_time_alert(face_name, face_phone, face_time)
+                    check_time_alert(face_name, face_phone, alarm_time)
 
 
-def check_time_alert(face_name, face_phone, face_time):
+def check_time_alert(face_name, face_phone, alarm_time):
+    logger.info(f"Check face and alert: face_name={face_name} , face_phone={face_phone}, alarm_time={alarm_time}")
     clock_json = read_from_json_file()
     # 上午上班打卡
+    face_time = datetime.strptime(alarm_time, "%m/%d/%Y %H:%M:%S")
     if is_clock_time(clock_dict['morning_clock_in'], face_time.time()):
         morning_clock_in_key = 'morning_clock_in_' + face_phone
         if has_clock(morning_clock_in_key) is not True:
             web_client = WeChatClient()
             web_client.get_token()
             web_client.send_msg(face_phone, face_name, face_time)
-            clock_json[morning_clock_in_key] = face_time
+            clock_json[morning_clock_in_key] = alarm_time
     # 上午下班打卡
     if is_clock_time(clock_dict['morning_clock_out'], face_time.time()):
         morning_clock_out_key = 'morning_clock_out_' + face_phone
@@ -91,7 +92,7 @@ def check_time_alert(face_name, face_phone, face_time):
             web_client = WeChatClient()
             web_client.get_token()
             web_client.send_msg(face_phone, face_name, face_time)
-            clock_json[morning_clock_out_key] = face_time
+            clock_json[morning_clock_out_key] = alarm_time
     # 下午上班打卡
     if is_clock_time(clock_dict['afternoon_clock_in'], face_time.time()):
         afternoon_clock_in_key = 'afternoon_clock_in_' + face_phone
@@ -99,7 +100,7 @@ def check_time_alert(face_name, face_phone, face_time):
             web_client = WeChatClient()
             web_client.get_token()
             web_client.send_msg(face_phone, face_name, face_time)
-            clock_json[afternoon_clock_in_key] = face_time
+            clock_json[afternoon_clock_in_key] = alarm_time
     # 下午下班打卡
     if is_clock_time(clock_dict['afternoon_clock_out'], face_time.time()):
         afternoon_clock_out_key = 'afternoon_clock_out_' + face_phone
@@ -107,7 +108,7 @@ def check_time_alert(face_name, face_phone, face_time):
             web_client = WeChatClient()
             web_client.get_token()
             web_client.send_msg(face_phone, face_name, face_time)
-            clock_json[afternoon_clock_out_key] = face_time
+            clock_json[afternoon_clock_out_key] = alarm_time
     write_to_json_file(clock_json)
 
 

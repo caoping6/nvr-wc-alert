@@ -1,8 +1,9 @@
 import json
+from datetime import datetime, time
 
 # 缓存字典
 cache = {}
-file_cache = '../cache/clock_cache.json'
+file_cache = './clock_cache.json'
 
 
 # 将数据写入JSON文件
@@ -29,6 +30,9 @@ def read_with_json_cache(file_path):
 
 # 示例：写入和读取JSON
 data = {'name': 'Alice', 'age': 30}
+face_time = datetime.strptime("10/26/2024 11:51:43", "%m/%d/%Y %H:%M:%S")
+
+data["mock"] = "10/26/2024 11:51:43"
 
 # 写入数据到JSON文件
 write_to_json_file(data)
