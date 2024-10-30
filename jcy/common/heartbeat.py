@@ -88,7 +88,10 @@ class Heartbeat:
             response = requests.post(self._check_url, headers=headers, verify=False, json=data)
             logger.info(f"Check Status Code: {response.status_code}")
             if response.status_code != 200:
-                logger.info(f"Check Response: {response.text}")
+                logger.info(f"Check Response and retry one times: {response.text}")
+                self.login()
+                response = requests.post(self._check_url, headers=headers, verify=False, json=data)
+                logger.info(f"Check Retry Status Code: {response.status_code}")
             return response
         except requests.exceptions.RequestException as e:
             logger.error(f"Check Request failed: {e}")

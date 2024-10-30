@@ -1,11 +1,8 @@
-import time
-
 from heartbeat import Heartbeat
 from datetime import datetime, time
 import time
 from wechat import WeChatClient
 from logger_util import Logger
-import threading
 import json
 from read_config import ReadConfig
 
@@ -26,35 +23,6 @@ def write_to_json_file(data):
 def read_from_json_file():
     with open(file_cache, 'r') as file:
         return json.load(file)
-
-
-def loop_heartbeat():
-    while True:
-        try:
-            logger.info("send to Heartbeat...")
-            # hb.send_heartbeat()
-            if is_clock_time("00:05-00:10", datetime.now().time()):
-                write_to_json_file({})
-            time.sleep(5)
-        except Exception as e:
-            logger.error(f"loop heartbeat failed: {e}")
-            time.sleep(2)
-
-
-def loop_check(request_json):
-    while True:
-        logger.info("send to Heartbeat...")
-        response = hb.check(request_json)
-        result = json.loads(response.text)
-        if result is not None and result.get("result") == 'success':
-            data = result.get("data")
-            request_json['reader_id'] = data["reader_id"]
-            request_json['sequence'] = data["sequence"]
-            request_json['lap_number'] = data["lap_number"]
-            parse_face_alarm(data)
-        else:
-            break
-        time.sleep(5)
 
 
 def parse_face_alarm(data):
@@ -81,35 +49,35 @@ def check_time_alert(face_name, face_phone, alarm_time):
     if is_clock_time(clock_dict['morning_clock_in'], face_time.time()):
         morning_clock_in_key = 'morning_clock_in_' + face_phone
         if has_clock(morning_clock_in_key) is not True:
-            web_client = WeChatClient()
-            web_client.get_token()
-            web_client.send_msg(face_phone, face_name, face_time)
+            send_wc_msg(face_name, face_phone, alarm_time)
             clock_json[morning_clock_in_key] = alarm_time
     # 上午下班打卡
-    if is_clock_time(clock_dict['morning_clock_out'], face_time.time()):
+    elif is_clock_time(clock_dict['morning_clock_out'], face_time.time()):
         morning_clock_out_key = 'morning_clock_out_' + face_phone
         if has_clock(morning_clock_out_key) is not True:
-            web_client = WeChatClient()
-            web_client.get_token()
-            web_client.send_msg(face_phone, face_name, face_time)
+            send_wc_msg(face_name, face_phone, alarm_time)
             clock_json[morning_clock_out_key] = alarm_time
     # 下午上班打卡
-    if is_clock_time(clock_dict['afternoon_clock_in'], face_time.time()):
+    elif is_clock_time(clock_dict['afternoon_clock_in'], face_time.time()):
         afternoon_clock_in_key = 'afternoon_clock_in_' + face_phone
         if has_clock(afternoon_clock_in_key) is not True:
-            web_client = WeChatClient()
-            web_client.get_token()
-            web_client.send_msg(face_phone, face_name, face_time)
+            send_wc_msg(face_name, face_phone, alarm_time)
             clock_json[afternoon_clock_in_key] = alarm_time
     # 下午下班打卡
-    if is_clock_time(clock_dict['afternoon_clock_out'], face_time.time()):
+    elif is_clock_time(clock_dict['afternoon_clock_out'], face_time.time()):
         afternoon_clock_out_key = 'afternoon_clock_out_' + face_phone
         if has_clock(afternoon_clock_out_key) is not True:
-            web_client = WeChatClient()
-            web_client.get_token()
-            web_client.send_msg(face_phone, face_name, face_time)
+            send_wc_msg(face_name, face_phone, alarm_time)
             clock_json[afternoon_clock_out_key] = alarm_time
+    else:
+        logger.info(f"not in clock time: {e}")
     write_to_json_file(clock_json)
+
+
+def send_wc_msg(face_name, face_phone, alarm_time):
+    web_client = WeChatClient()
+    web_client.get_token()
+    web_client.send_msg(face_phone, face_name, alarm_time)
 
 
 def is_clock_time(clock_time, face_time):
@@ -144,22 +112,32 @@ def check_first():
             }
         }
         loop_check(request_json)
-    else:
-        hb.login()
-    time.sleep(5)
+
+
+def loop_check(request_json):
+    while True:
+        hb.send_heartbeat()
+        logger.info("loop check second...")
+        response = hb.check(request_json)
+        result = json.loads(response.text)
+        if result is not None and result.get("result") == 'success':
+            data = result.get("data")
+            request_json['reader_id'] = data["reader_id"]
+            request_json['sequence'] = data["sequence"]
+            request_json['lap_number'] = data["lap_number"]
+            parse_face_alarm(data)
+        else:
+            break
+        time.sleep(1)
 
 
 if __name__ == '__main__':
     logger.info("start process...")
-    thread = threading.Thread(target=loop_heartbeat)
-    thread.start()
-    time.sleep(10)
-    logger.info("start check...")
     while True:
         try:
+            logger.info("send heartbeat then check...")
+            hb.send_heartbeat()
             check_first()
         except Exception as e:
             logger.error(f"check first failed: {e}")
             time.sleep(2)
-
-
