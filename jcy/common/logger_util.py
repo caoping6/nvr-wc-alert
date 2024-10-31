@@ -59,7 +59,7 @@ class Logger:
 
         self._log_handler = self.logger.add(
             sink=self._log_file,  # 每次调用时都生成新的log文件
-            rotation='2 MB',  # 超过50MB就会重新生产一个文件（常用），其他用法可以查一下
+            rotation='10 MB',  # 超过50MB就会重新生产一个文件（常用），其他用法可以查一下
             encoding='utf-8',
             format=self._get_log_format(),
             level=write_level,

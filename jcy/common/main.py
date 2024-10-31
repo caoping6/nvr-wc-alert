@@ -75,9 +75,12 @@ def check_time_alert(face_name, face_phone, alarm_time):
 
 
 def send_wc_msg(face_name, face_phone, alarm_time):
-    web_client = WeChatClient()
-    web_client.get_token()
-    web_client.send_msg(face_phone, face_name, alarm_time)
+    try:
+        web_client = WeChatClient()
+        web_client.get_token()
+        web_client.send_msg(face_phone, face_name, alarm_time)
+    except Exception as exception:
+        logger.error(f"send wechat failed: {exception}")
 
 
 def is_clock_time(clock_time, face_time):
@@ -85,6 +88,16 @@ def is_clock_time(clock_time, face_time):
     start_time = datetime.strptime(time_arr[0], '%H:%M').time()
     end_time = datetime.strptime(time_arr[1], '%H:%M').time()
     return start_time <= face_time <= end_time
+
+
+def is_clock_time_segment(clock_time):
+    if is_clock_time(clock_dict['morning_clock_in'], clock_time) \
+        or is_clock_time(clock_dict['morning_clock_out'], clock_time) \
+        or is_clock_time(clock_dict['afternoon_clock_in'], clock_time) \
+        or is_clock_time(clock_dict['afternoon_clock_out'], clock_time):
+        return True
+    else:
+        return False
 
 
 def has_clock(clock_key):
@@ -135,6 +148,10 @@ if __name__ == '__main__':
     logger.info("start process...")
     while True:
         try:
+            # 不再时间段内直接退出
+            if is_clock_time_segment(datetime.now().time()) is not True:
+                time.sleep(2)
+                continue
             logger.info("send heartbeat then check...")
             hb.send_heartbeat()
             check_first()
