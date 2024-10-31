@@ -23,7 +23,7 @@ class ReadConfig(object):
     def __init_config(self, section, config):
         config_dict = dict()
         config_parser = configparser.ConfigParser()
-        config_parser.read(config)
+        config_parser.read(config, encoding="utf8")
         if config_parser.has_section(section):
             config_dict = dict(config_parser.items(section))
         return config_dict
