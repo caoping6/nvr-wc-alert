@@ -46,11 +46,11 @@ class WeChatClient:
             logger.error('获取access token失败')
 
     # 定义请求函数
-    def send_msg(self, phone, name, time):
+    def send_msg(self, phone, name, alert_time):
         url = self._send_url + self._access_token
         # 格式化日期和时间为字符串
-        formatted_time = time.strftime("%Y-%m-%d %H:%M:%S")
-        open_id = self.openid_dict.get(phone)
+        formatted_time = alert_time.strftime("%Y-%m-%d %H:%M:%S")
+        open_id = self.openid_dict[phone]
         data = {
             "touser": open_id,
             "template_id": self._template_id,
