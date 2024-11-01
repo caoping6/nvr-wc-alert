@@ -50,7 +50,7 @@ class WeChatClient:
         url = self._send_url + self._access_token
         # 格式化日期和时间为字符串
         formatted_time = time.strftime("%Y-%m-%d %H:%M:%S")
-        open_id = self.openid_dict[phone]
+        open_id = self.openid_dict.get(phone)
         data = {
             "touser": open_id,
             "template_id": self._template_id,
@@ -77,7 +77,11 @@ class WeChatClient:
 
 if __name__ == '__main__':
     web_client = WeChatClient()
-    web_client.get_token()
-    print(web_client._access_token)
-    web_client.send_msg('17611225585', '曹平', datetime.now())
+    # web_client.get_token()
+    # print(web_client._access_token)
+    # web_client.send_msg('17611225585', '曹平', datetime.now())
+    openid = web_client.openid_dict.get("13947254696")
+    print(openid)
+    if openid is None:
+        print("ssss")
 

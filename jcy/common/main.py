@@ -11,6 +11,7 @@ logger = Logger("../logs/alert.log")
 hb = Heartbeat()
 clock_dict = ReadConfig("clock_time", 'jcy/conf/alert.conf').get_config()
 file_cache = 'clock_cache.json'
+web_client = WeChatClient()
 
 
 # 将数据写入JSON文件
@@ -43,6 +44,10 @@ def parse_face_alarm(data):
 
 def check_time_alert(face_name, face_phone, alarm_time):
     logger.info(f"Check face and alert: face_name={face_name} , face_phone={face_phone}, alarm_time={alarm_time}")
+    open_id = web_client.openid_dict.get(face_phone)
+    if open_id is None:
+        logger.warning(f"Check face openid is not exists: face_phone={face_phone}")
+        return
     clock_json = read_from_json_file()
     # 上午上班打卡
     face_time = datetime.strptime(alarm_time, "%m/%d/%Y %H:%M:%S")
@@ -76,7 +81,6 @@ def check_time_alert(face_name, face_phone, alarm_time):
 
 def send_wc_msg(face_name, face_phone, alarm_time):
     try:
-        web_client = WeChatClient()
         web_client.get_token()
         web_client.send_msg(face_phone, face_name, alarm_time)
     except Exception as exception:
