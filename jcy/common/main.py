@@ -159,6 +159,8 @@ if __name__ == '__main__':
     logger.info("start process...")
     while True:
         try:
+            if is_clock_time("00:05-00:10", datetime.now().time()):
+                write_to_json_file({})
             # 不再时间段内直接退出
             if is_clock_time_segment(datetime.now().time()) is not True:
                 time.sleep(2)
