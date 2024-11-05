@@ -78,7 +78,7 @@ class Heartbeat:
             self.login()
 
     def check(self, data):
-        logger.info("start check")
+        logger.debug("start check")
         headers = {
             'Content-Type': 'application/json',
             'X-csrftoken': self._token,
@@ -86,7 +86,7 @@ class Heartbeat:
         }
         try:
             response = requests.post(self._check_url, headers=headers, verify=False, json=data)
-            logger.info(f"Check Status Code: {response.status_code}")
+            logger.debug(f"Check Status Code: {response.status_code}")
             if response.status_code != 200:
                 logger.info(f"Check Response and retry one times: {response.text}")
             return response

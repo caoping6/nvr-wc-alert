@@ -12,7 +12,8 @@ hb = Heartbeat()
 clock_dict = ReadConfig("clock_time", 'jcy/conf/alert.conf').get_config()
 file_cache = 'clock_cache.json'
 web_client = WeChatClient()
-
+face_sequence=0
+face_lap_number=0
 
 # 将数据写入JSON文件
 def write_to_json_file(data):
@@ -117,8 +118,8 @@ def check_first():
     if result is not None and result.get("result") == 'success':
         data = result.get("data")
         reader_id = data["reader_id"]
-        sequence = data["sequence"]
-        lap_number = data["lap_number"]
+        sequence = face_sequence if face_sequence > 0 else data["sequence"]
+        lap_number = face_lap_number if face_lap_number > 0 else data["lap_number"]
 
         request_json = {
             "data": {
@@ -146,9 +147,17 @@ def loop_check(request_json):
         result = json.loads(response.text)
         if result is not None and result.get("result") == 'success':
             data = result.get("data")
+            reader_id = data["reader_id"]
+            sequence = data["sequence"]
+            lap_number = data["lap_number"]
+            logger.info(f"check result reader_id= {reader_id}, sequence={sequence}, lap_number={lap_number}")
             request_json['reader_id'] = data["reader_id"]
             request_json['sequence'] = data["sequence"]
             request_json['lap_number'] = data["lap_number"]
+            global face_sequence
+            face_sequence = sequence
+            global face_lap_number
+            face_lap_number = lap_number
             parse_face_alarm(data)
         else:
             break
@@ -170,4 +179,3 @@ if __name__ == '__main__':
             check_first()
         except Exception as e:
             logger.error(f"check first failed: {e}")
-            time.sleep(0.2)
