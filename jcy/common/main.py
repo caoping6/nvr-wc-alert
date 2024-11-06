@@ -39,7 +39,7 @@ def parse_face_alarm(data):
             for face_alarm in face_alarms:
                 face_id = face_alarm["Id"]
                 if face_id > 0:
-                    logger.info(f"face_alarm={json.loads(face_alarm)}")
+                    logger.info(f"face_alarm={json.dumps(face_alarm)}")
                     face_name = face_alarm["Name"]
                     face_phone = face_alarm["Phone"]
                     check_time_alert(face_name, face_phone, alarm_time)
