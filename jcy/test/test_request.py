@@ -1,4 +1,7 @@
 import requests
+from jcy.common.logger_util import Logger
+import traceback
+logger = Logger("../logs/test.log")
 
 seq = 2
 
@@ -19,5 +22,7 @@ if __name__ == '__main__':
     # )
     #
     # print(response)
-    params()
-    print(seq)
+    try:
+        print(1 / 0)
+    except Exception as e:
+        logger.error(f"check first failed: {traceback.format_exc()}")

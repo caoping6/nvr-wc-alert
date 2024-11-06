@@ -5,6 +5,7 @@ from wechat import WeChatClient
 from logger_util import Logger
 import json
 from read_config import ReadConfig
+import traceback
 
 logger = Logger("../logs/alert.log")
 
@@ -38,6 +39,7 @@ def parse_face_alarm(data):
             for face_alarm in face_alarms:
                 face_id = face_alarm["Id"]
                 if face_id > 0:
+                    logger.info(f"face_alarm={json.loads(face_alarm)}")
                     face_name = face_alarm["Name"]
                     face_phone = face_alarm["Phone"]
                     check_time_alert(face_name, face_phone, alarm_time)
@@ -178,4 +180,4 @@ if __name__ == '__main__':
             hb.send_heartbeat()
             check_first()
         except Exception as e:
-            logger.error(f"check first failed: {e}")
+            logger.error(f"check first failed: {traceback.format_exc()}")
