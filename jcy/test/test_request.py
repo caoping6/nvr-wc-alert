@@ -1,6 +1,6 @@
 import requests
 from jcy.common.logger_util import Logger
-import traceback
+import json
 logger = Logger("../logs/test.log")
 
 seq = 2
@@ -22,7 +22,5 @@ if __name__ == '__main__':
     # )
     #
     # print(response)
-    try:
-        print(1 / 0)
-    except Exception as e:
-        logger.error(f"check first failed: {traceback.format_exc()}")
+    data = {'name': 'Alice', 'age': 30, 'city': 'New York'}
+    print(json.dumps(data))

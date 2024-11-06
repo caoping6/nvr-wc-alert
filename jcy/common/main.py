@@ -163,7 +163,6 @@ def loop_check(request_json):
             parse_face_alarm(data)
         else:
             break
-        time.sleep(1)
 
 
 if __name__ == '__main__':
