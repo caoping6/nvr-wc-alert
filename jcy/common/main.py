@@ -135,6 +135,8 @@ def check_first():
 
 
 def loop_check(request_json):
+    global face_sequence
+    global face_lap_number
     # 获取当前时间戳
     start_time = time.time()
     while True:
@@ -146,6 +148,10 @@ def loop_check(request_json):
             break
         logger.info("loop check second...")
         response = hb.check(request_json)
+        if response.status_code != 200:
+            face_sequence = 0
+            face_lap_number = 0
+            return
         result = json.loads(response.text)
         if result is not None and result.get("result") == 'success':
             data = result.get("data")
@@ -156,9 +162,7 @@ def loop_check(request_json):
             request_json['reader_id'] = data["reader_id"]
             request_json['sequence'] = data["sequence"]
             request_json['lap_number'] = data["lap_number"]
-            global face_sequence
             face_sequence = sequence
-            global face_lap_number
             face_lap_number = lap_number
             parse_face_alarm(data)
         else:
