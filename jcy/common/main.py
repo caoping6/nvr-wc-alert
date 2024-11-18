@@ -40,9 +40,7 @@ def parse_face_alarm(data):
                 face_id = face_alarm["Id"]
                 if face_id > 0:
                     try:
-                        face_name = face_alarm["Name"]
-                        face_phone = face_alarm["Phone"]
-                        check_time_alert(face_name, face_phone, alarm_time)
+                        check_time_alert(face_name, face_id, alarm_time)
                     except Exception as exp:
                         logger.error(f"check first failed: {exp}")
 
