@@ -40,42 +40,43 @@ def parse_face_alarm(data):
                 face_id = face_alarm["Id"]
                 if face_id > 0:
                     try:
+                        face_name = face_alarm["Name"]
                         check_time_alert(face_name, face_id, alarm_time)
                     except Exception as exp:
                         logger.error(f"check first failed: {exp}")
 
 
-def check_time_alert(face_name, face_phone, alarm_time):
-    logger.info(f"Check face and alert: face_name={face_name} , face_phone={face_phone}, alarm_time={alarm_time}")
-    open_id = web_client.openid_dict.get(face_phone)
+def check_time_alert(face_name, face_id, alarm_time):
+    logger.info(f"Check face and alert: face_name={face_name} , face_id={face_id}, alarm_time={alarm_time}")
+    open_id = web_client.openid_dict.get(face_id)
     if open_id is None:
-        logger.warning(f"Check face openid is not exists: face_phone={face_phone}")
+        logger.warning(f"Check face openid is not exists: face_id={face_id}")
         return
     clock_json = read_from_json_file()
     # 上午上班打卡
     face_time = datetime.strptime(alarm_time, "%m/%d/%Y %H:%M:%S")
     if is_clock_time(clock_dict['morning_clock_in'], face_time.time()):
-        morning_clock_in_key = 'morning_clock_in_' + face_phone
+        morning_clock_in_key = 'morning_clock_in_' + face_id
         if has_clock(morning_clock_in_key) is not True:
-            send_wc_msg(face_name, face_phone, face_time)
+            send_wc_msg(face_name, face_id, face_time)
             clock_json[morning_clock_in_key] = alarm_time
     # 上午下班打卡
     elif is_clock_time(clock_dict['morning_clock_out'], face_time.time()):
-        morning_clock_out_key = 'morning_clock_out_' + face_phone
+        morning_clock_out_key = 'morning_clock_out_' + face_id
         if has_clock(morning_clock_out_key) is not True:
-            send_wc_msg(face_name, face_phone, face_time)
+            send_wc_msg(face_name, face_id, face_time)
             clock_json[morning_clock_out_key] = alarm_time
     # 下午上班打卡
     elif is_clock_time(clock_dict['afternoon_clock_in'], face_time.time()):
-        afternoon_clock_in_key = 'afternoon_clock_in_' + face_phone
+        afternoon_clock_in_key = 'afternoon_clock_in_' + face_id
         if has_clock(afternoon_clock_in_key) is not True:
-            send_wc_msg(face_name, face_phone, face_time)
+            send_wc_msg(face_name, face_id, face_time)
             clock_json[afternoon_clock_in_key] = alarm_time
     # 下午下班打卡
     elif is_clock_time(clock_dict['afternoon_clock_out'], face_time.time()):
-        afternoon_clock_out_key = 'afternoon_clock_out_' + face_phone
+        afternoon_clock_out_key = 'afternoon_clock_out_' + face_id
         if has_clock(afternoon_clock_out_key) is not True:
-            send_wc_msg(face_name, face_phone, face_time)
+            send_wc_msg(face_name, face_id, face_time)
             clock_json[afternoon_clock_out_key] = alarm_time
     else:
         logger.info(f"not in clock time: {e}")
