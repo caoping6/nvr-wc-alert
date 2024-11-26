@@ -40,5 +40,13 @@ if __name__ == '__main__':
         check(data)
         print("success")
 
+    res2 = '{"data":{"Result":0,"ResultReason":"Successful","Count":1,"FaceInfo":[{"Id":131,"GrpId":16,"Name":"王子华","MD5":"1827C45CF71C5DCE1373C503F3035812","Sex":0,"Age":0,"ModifyCnt":1,"Country":"","NativePlace":"","IdCode":"","Job":"","Phone":"18647286383","Email":"","Domicile":"","Remark":"70","EnableChnAlarm":[]}]}}'
+    result_data = json.loads(res2).get("data")
+    if result_data is not None and result_data.get("Result") == 0:
+        face_info = result_data.get("FaceInfo")
+        if face_info is not None:
+            phone = face_info[0].get("Phone")
+            print(phone)
+
 
 

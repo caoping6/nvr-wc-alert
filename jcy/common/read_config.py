@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import configparser
 import os
 from jcy.common.logger_util import Logger

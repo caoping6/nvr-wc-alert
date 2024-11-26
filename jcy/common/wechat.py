@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 
 import requests
@@ -80,7 +82,7 @@ if __name__ == '__main__':
     # web_client.get_token()
     # print(web_client._access_token)
     # web_client.send_msg('17611225585', '曹平', datetime.now())
-    openid = web_client.openid_dict.get("13947254696")
+    openid = web_client.openid_dict.get("曹平")
     print(openid)
     if openid is None:
         print("ssss")

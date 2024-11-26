@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 
 import requests
@@ -20,6 +22,7 @@ class Heartbeat:
     _heart_url = _host + "/API/Login/Heartbeat"
     _login_url = _host + "/API/Web/Login"
     _check_url = _host + "/API/Event/Check"
+    _get_info_url = _host + "/API/AI/AddedFaces/GetById"
     _instance = None
     _token = None
     _cookie = None
@@ -30,7 +33,7 @@ class Heartbeat:
             with cls._lock:
                 if cls._instance is None:
                     cls._instance = super(Heartbeat, cls).__new__(cls)
-                    # cls._instance.login()
+                    cls._instance.login()
         return cls._instance
 
     def login(self, algorithm='SHA-256'):
@@ -92,7 +95,27 @@ class Heartbeat:
             return response
         except requests.exceptions.RequestException as e:
             logger.error(f"Check Request failed: {e}")
-            self.login()
+
+    def get_byid(self, face_id):
+        logger.info(f"get by id : {face_id}")
+        data = {
+                    "data": {
+                        "FacesId": [face_id]
+                    }
+                }
+        headers = {
+            'Content-Type': 'application/json',
+            'X-csrftoken': self._token,
+            'Cookie': self._cookie
+        }
+        try:
+            response = requests.post(self._get_info_url, headers=headers, verify=False, json=data)
+            logger.debug(f"Get by id: {response.status_code}")
+            if response.status_code != 200:
+                logger.info(f"Get by id error: {response.text}")
+            return response
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Get by id failed: {e}")
 
 
 if __name__ == '__main__':
@@ -101,8 +124,11 @@ if __name__ == '__main__':
 
     print("token=" + hb._token)
     print("cookie=" + hb._cookie)
-    while True:
-        # 运行所有调度任务
-        logger.info("Heartbeat loop")
-        time.sleep(10)
-        hb.send_heartbeat()
+    response = hb.get_byid(131)
+    result_data = json.loads(response.text).get("data")
+    logger.warning(f"get by id=: {result_data}")
+    if result_data is not None and result_data.get("Result") == 0:
+        face_info = result_data.get("FaceInfo")
+        if face_info is not None:
+            face_phone = face_info[0].get("Phone")
+            print(face_phone)
