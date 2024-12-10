@@ -56,6 +56,16 @@ def parse_face_alarm(data):
                         check_time_alert(face_name, face_phone, alarm_time)
                     except Exception as exp:
                         logger.error(f"check first failed: {exp}")
+                        face_name = face_alarm["Name"]
+                        logger.warning(f"check face phone is null: {face_name}")
+                        response = hb.get_byid(face_id)
+                        result_data = json.loads(response.text).get("data")
+                        logger.warning(f"get by id=: {result_data}")
+                        if result_data is not None and result_data.get("Result") == 0:
+                            face_info = result_data.get("FaceInfo")
+                            if face_info is not None:
+                                phone_by_id = face_info[0].get("Phone")
+                                check_time_alert(face_name, phone_by_id, alarm_time)
 
 
 def check_time_alert(face_name, face_phone, alarm_time):
@@ -156,9 +166,11 @@ def loop_check(request_json):
         # 获取当前时间和开始时间之间的差值
         elapsed_time = time.time() - start_time
         # 检查是否已经超过30秒
-        if elapsed_time > 28:
-            logger.info("Exiting loop after 30 seconds.")
-            break
+        if elapsed_time > 10:
+            hb.send_heartbeat()
+            start_time = time.time()
+           # logger.info("Exiting loop after 30 seconds.")
+           # break
         logger.info("loop check second...")
         response = hb.check(request_json)
         if response.status_code != 200:
