@@ -143,8 +143,12 @@ def check_first():
     if result is not None and result.get("result") == 'success':
         data = result.get("data")
         reader_id = data["reader_id"]
-        sequence = face_sequence if face_sequence > 0 else data["sequence"]
-        lap_number = face_lap_number if face_lap_number > 0 else data["lap_number"]
+        if face_sequence > 0:
+            sequence = face_sequence
+            lap_number = face_lap_number
+        else:
+            sequence = data["sequence"]
+            lap_number = data["lap_number"]
 
         request_json = {
             "data": {
@@ -183,6 +187,8 @@ def loop_check(request_json):
             reader_id = data["reader_id"]
             sequence = data["sequence"]
             lap_number = data["lap_number"]
+            if sequence == face_sequence and lap_number == face_lap_number:
+                continue
             logger.info(f"check result reader_id= {reader_id}, sequence={sequence}, lap_number={lap_number}")
             request_json['reader_id'] = data["reader_id"]
             request_json['sequence'] = data["sequence"]
