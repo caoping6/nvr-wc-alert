@@ -8,6 +8,7 @@ from logger_util import Logger
 import json
 from read_config import ReadConfig
 import traceback
+from threading import Thread
 
 logger = Logger("../logs/alert.log")
 
@@ -165,16 +166,10 @@ def loop_check(request_json):
     global face_sequence
     global face_lap_number
     # 获取当前时间戳
-    start_time = time.time()
     while True:
+        if is_clock_time_segment(datetime.now().time()) is not True:
+            return
         # 获取当前时间和开始时间之间的差值
-        elapsed_time = time.time() - start_time
-        # 检查是否已经超过30秒
-        if elapsed_time > 10:
-            hb.send_heartbeat()
-            start_time = time.time()
-           # logger.info("Exiting loop after 30 seconds.")
-           # break
         logger.info("loop check second...")
         response = hb.check(request_json)
         if response.status_code != 200:
@@ -200,18 +195,24 @@ def loop_check(request_json):
             break
 
 
+def heartbeat():
+    while True:
+        logger.info("send heartbeat ...")
+        hb.send_heartbeat()
+        time.sleep(1)
+
+
 if __name__ == '__main__':
     logger.info("start process...")
+    Thread(target=heartbeat, daemon=True).start()
     while True:
         try:
             if is_clock_time("00:05-00:10", datetime.now().time()):
                 write_to_json_file({})
             # 不再时间段内直接退出
             if is_clock_time_segment(datetime.now().time()) is not True:
-                time.sleep(2)
+                time.sleep(0.2)
                 continue
-            logger.info("send heartbeat then check...")
-            hb.send_heartbeat()
             check_first()
         except Exception as e:
             logger.error(f"check first failed: {traceback.format_exc()}")
