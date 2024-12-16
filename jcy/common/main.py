@@ -8,6 +8,7 @@ from logger_util import Logger
 import json
 from read_config import ReadConfig
 import traceback
+from threading import Thread
 
 logger = Logger("../logs/alert.log")
 
@@ -66,7 +67,6 @@ def parse_face_alarm(data):
                             if face_info is not None:
                                 phone_by_id = face_info[0].get("Phone")
                                 check_time_alert(face_name, phone_by_id, alarm_time)
-
 
 
 def check_time_alert(face_name, face_phone, alarm_time):
@@ -144,8 +144,12 @@ def check_first():
     if result is not None and result.get("result") == 'success':
         data = result.get("data")
         reader_id = data["reader_id"]
-        sequence = face_sequence if face_sequence > 0 else data["sequence"]
-        lap_number = face_lap_number if face_lap_number > 0 else data["lap_number"]
+        if face_sequence > 0:
+            sequence = face_sequence
+            lap_number = face_lap_number
+        else:
+            sequence = data["sequence"]
+            lap_number = data["lap_number"]
 
         request_json = {
             "data": {
@@ -162,14 +166,10 @@ def loop_check(request_json):
     global face_sequence
     global face_lap_number
     # 获取当前时间戳
-    start_time = time.time()
     while True:
+        if is_clock_time_segment(datetime.now().time()) is not True:
+            return
         # 获取当前时间和开始时间之间的差值
-        elapsed_time = time.time() - start_time
-        # 检查是否已经超过30秒
-        if elapsed_time > 28:
-            logger.info("Exiting loop after 30 seconds.")
-            break
         logger.info("loop check second...")
         response = hb.check(request_json)
         if response.status_code != 200:
@@ -182,6 +182,8 @@ def loop_check(request_json):
             reader_id = data["reader_id"]
             sequence = data["sequence"]
             lap_number = data["lap_number"]
+            if sequence == face_sequence and lap_number == face_lap_number:
+                continue
             logger.info(f"check result reader_id= {reader_id}, sequence={sequence}, lap_number={lap_number}")
             request_json['reader_id'] = data["reader_id"]
             request_json['sequence'] = data["sequence"]
@@ -193,18 +195,24 @@ def loop_check(request_json):
             break
 
 
+def heartbeat():
+    while True:
+        logger.info("send heartbeat ...")
+        hb.send_heartbeat()
+        time.sleep(1)
+
+
 if __name__ == '__main__':
     logger.info("start process...")
+    Thread(target=heartbeat, daemon=True).start()
     while True:
         try:
             if is_clock_time("00:05-00:10", datetime.now().time()):
                 write_to_json_file({})
             # 不再时间段内直接退出
             if is_clock_time_segment(datetime.now().time()) is not True:
-                time.sleep(2)
+                time.sleep(0.2)
                 continue
-            logger.info("send heartbeat then check...")
-            hb.send_heartbeat()
             check_first()
         except Exception as e:
             logger.error(f"check first failed: {traceback.format_exc()}")
