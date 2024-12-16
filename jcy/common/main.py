@@ -182,12 +182,10 @@ def loop_check(request_json):
             reader_id = data["reader_id"]
             sequence = data["sequence"]
             lap_number = data["lap_number"]
-            if sequence == face_sequence and lap_number == face_lap_number:
-                continue
             logger.info(f"check result reader_id= {reader_id}, sequence={sequence}, lap_number={lap_number}")
-            request_json['reader_id'] = data["reader_id"]
-            request_json['sequence'] = data["sequence"]
-            request_json['lap_number'] = data["lap_number"]
+            request_json["data"]['reader_id'] = data["reader_id"]
+            request_json["data"]['sequence'] = data["sequence"]
+            request_json["data"]['lap_number'] = data["lap_number"]
             face_sequence = sequence
             face_lap_number = lap_number
             parse_face_alarm(data)
@@ -196,10 +194,13 @@ def loop_check(request_json):
 
 
 def heartbeat():
-    while True:
-        logger.info("send heartbeat ...")
-        hb.send_heartbeat()
-        time.sleep(1)
+    try:
+        while True:
+            logger.info("send heartbeat ...")
+            hb.send_heartbeat()
+            time.sleep(1)
+    except Exception as exception:
+        logger.error(f"heartbeat failed: {traceback.format_exc()}")
 
 
 if __name__ == '__main__':

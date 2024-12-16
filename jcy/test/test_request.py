@@ -9,10 +9,6 @@ def params():
     sequence = seq if seq > 0 else 3
     print(sequence)
 
-def change():
-    global seq
-    seq=10
-
 if __name__ == '__main__':
     # response = requests.request(
     #     method='GET',
@@ -26,13 +22,5 @@ if __name__ == '__main__':
     # )
     #
     # print(response)
-    # data = {'name': 'Alice', 'age': 30, 'city': 'New York'}
-    # print(json.dumps(data))
-    # 定义两个变量
-    sequence = 10
-    face_sequence = 15
-
-    # 使用条件表达式实现三元运算符的功能
-    result = sequence if sequence > face_sequence else face_sequence
-
-    print(result)  # 输出: 10
+    data = {'name': 'Alice', 'age': 30, 'city': 'New York'}
+    print(json.dumps(data))
