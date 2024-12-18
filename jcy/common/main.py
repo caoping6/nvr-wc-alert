@@ -194,13 +194,13 @@ def loop_check(request_json):
 
 
 def heartbeat():
-    try:
-        while True:
+    while True:
+        try:
             logger.info("send heartbeat ...")
             hb.send_heartbeat()
             time.sleep(1)
-    except Exception as exception:
-        logger.error(f"heartbeat failed: {traceback.format_exc()}")
+        except Exception as exception:
+            logger.error(f"heartbeat failed: {traceback.format_exc()}")
 
 
 if __name__ == '__main__':

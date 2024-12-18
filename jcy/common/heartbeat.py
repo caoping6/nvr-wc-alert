@@ -45,7 +45,7 @@ class Heartbeat:
             # 如果提供的算法不是服务器支持的算法，则可能需要调整算法
             response.request.headers['Authorization'] = 'Digest ' + algorithm
             # 重新发送请求
-            response = requests.get(self._login_url, auth=HTTPDigestAuth(self._username, self._password), verify=False)
+            response = requests.get(self._login_url, auth=HTTPDigestAuth(self._username, self._password), verify=False, timeout=15)
 
         # 检查登录是否成功
         if response.ok:
@@ -71,7 +71,7 @@ class Heartbeat:
         }
 
         try:
-            response = requests.post(self._heart_url, headers=headers, verify=False, json={})
+            response = requests.post(self._heart_url, headers=headers, verify=False, json={}, timeout=15)
             result = json.loads(response.text)
             logger.info(f"Heartbeat Status Code: {response.status_code}\nResponse Text: {response.text}")
             if 'error_code' in result:
@@ -88,12 +88,12 @@ class Heartbeat:
             'Cookie': self._cookie
         }
         try:
-            response = requests.post(self._check_url, headers=headers, verify=False, json=data)
+            response = requests.post(self._check_url, headers=headers, verify=False, json=data, timeout=15)
             logger.debug(f"Check Status Code: {response.status_code}")
             if response.status_code != 200:
                 logger.info(f"Check Response and retry one times: {response.text}")
             return response
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             logger.error(f"Check Request failed: {e}")
 
     def get_byid(self, face_id):
