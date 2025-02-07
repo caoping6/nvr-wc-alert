@@ -9,6 +9,9 @@ import json
 from read_config import ReadConfig
 import traceback
 from threading import Thread
+import os
+import time
+from loguru import logger
 
 logger = Logger("../logs/alert.log")
 
@@ -203,6 +206,19 @@ def heartbeat():
             logger.error(f"heartbeat failed: {traceback.format_exc()}")
 
 
+def clean_old_logs(log_dir, expiration_days):
+    current_time = time.time()
+    for root, _, files in os.walk(log_dir):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if os.path.isfile(file_path):
+                # 获取文件的创建时间或修改时间（根据需求）
+                file_age = current_time - os.path.getmtime(file_path)
+                if file_age > expiration_days * 86400:  # 转换为秒
+                    os.remove(file_path)
+                    logger.info(f"Deleted old log file: {file_path}")
+
+
 if __name__ == '__main__':
     logger.info("start process...")
     Thread(target=heartbeat, daemon=True).start()
@@ -210,6 +226,9 @@ if __name__ == '__main__':
         try:
             if is_clock_time("00:05-00:10", datetime.now().time()):
                 write_to_json_file({})
+                log_dir = "../logs"
+                expiration_days = 15  # 15天有效期
+                clean_old_logs(log_dir, expiration_days)
             # 不再时间段内直接退出
             if is_clock_time_segment(datetime.now().time()) is not True:
                 time.sleep(0.2)
